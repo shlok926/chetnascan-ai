@@ -619,38 +619,92 @@ def download_comprehensive_report():
 
 @app.route("/scam-alerts", methods=["GET"])
 def scam_alerts():
-    alerts = [
-        {
-            "id": 1,
-            "title": "Smishing: USPS Courier Address Rescheduling",
-            "type": "Package Delivery Scam",
-            "date": "Trending Today",
-            "risk": "High Risk",
-            "color": "red",
-            "description": "SMS alerts claiming package delivery is held at transit hub due to missing street numbers. Redirects to clone postal portals requesting address edits and minor processing fees.",
-            "advisory": "Never click SMS links for delivery rescheduling. Check status directly on the official postal tracker using your original invoice tracking number."
-        },
-        {
-            "id": 2,
-            "title": "Vishing: AI Voice Cloning Urgent Impersonation",
-            "type": "Voice Spoofing Scam",
-            "date": "Active Threat",
-            "risk": "Critical Risk",
-            "color": "red",
-            "description": "Scammers are using voice samples from social media reels/videos to clone relatives' voices. They call crying or in distress claiming they are in jail or had an accident and require urgent wire transfers.",
-            "advisory": "Set up a secret safety passcode with your close family members. Always call the relative back on their known official contact number to verify."
-        },
-        {
-            "id": 3,
-            "title": "Phishing: Fake Electricity Bill Disconnection Alerts",
-            "type": "Utility Fraud Scam",
-            "date": "Highly Trending",
-            "risk": "High Risk",
-            "color": "yellow",
-            "description": "WhatsApp messages or robocalls warning that electricity will be disconnected within 2 hours due to unpaid dues, prompting you to call a fake helpline number.",
-            "advisory": "Utility providers do not contact users via personal WhatsApp numbers or request direct UPI payments to unofficial phone numbers."
-        }
-    ]
+    import urllib.request
+    import xml.etree.ElementTree as ET
+    import re
+    
+    url = "https://www.cisa.gov/cybersecurity-advisories/all.xml"
+    req = urllib.request.Request(
+        url,
+        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    )
+    
+    alerts = []
+    try:
+        with urllib.request.urlopen(req, timeout=4) as response:
+            xml_data = response.read()
+        root = ET.fromstring(xml_data)
+        items = root.findall(".//item")
+        
+        for idx, item in enumerate(items[:3]):
+            title = item.find("title").text if item.find("title") is not None else "Active Security Advisory"
+            link = item.find("link").text if item.find("link") is not None else "#"
+            pub_date = item.find("pubDate").text if item.find("pubDate") is not None else "Trending Today"
+            description = item.find("description").text if item.find("description") is not None else ""
+            
+            # Basic HTML tag strip and cleanup
+            if description:
+                description = re.sub('<[^<]+?>', '', description)
+                description = description.replace("&nbsp;", " ").strip()
+                if len(description) > 170:
+                    description = description[:167] + "..."
+            else:
+                description = "CISA has released a trending cyber alert. Review specific advisory references for organizational threat mitigations."
+            
+            # Format CISA date cleanly
+            clean_date = pub_date.split(" +")[0] if " +" in pub_date else pub_date
+            clean_date = clean_date.split(" -")[0] if " -" in clean_date else clean_date
+            if len(clean_date) > 16:
+                clean_date = clean_date[:16]
+
+            alerts.append({
+                "id": idx + 1,
+                "title": title,
+                "type": "CISA Advisory Bulletin",
+                "date": clean_date,
+                "risk": "Critical Risk" if idx == 0 else "High Risk",
+                "color": "red" if idx == 0 else "yellow",
+                "description": description,
+                "advisory": f"Review active CVE patches and apply security updates outlined in official advisory. Details: {link}"
+            })
+            
+    except Exception as e:
+        print("CISA Live RSS Feed fetch failed. Falling back to local threat alerts. Error:", e)
+
+    # Fallback to rich local alerts if CISA fetch fails or yields empty list
+    if not alerts:
+        alerts = [
+            {
+                "id": 1,
+                "title": "Smishing: USPS Courier Address Rescheduling",
+                "type": "Package Delivery Scam",
+                "date": "Trending Today",
+                "risk": "High Risk",
+                "color": "red",
+                "description": "SMS alerts claiming package delivery is held at transit hub due to missing street numbers. Redirects to clone postal portals requesting address edits and minor processing fees.",
+                "advisory": "Never click SMS links for delivery rescheduling. Check status directly on the official postal tracker using your original invoice tracking number."
+            },
+            {
+                "id": 2,
+                "title": "Vishing: AI Voice Cloning Urgent Impersonation",
+                "type": "Voice Spoofing Scam",
+                "date": "Active Threat",
+                "risk": "Critical Risk",
+                "color": "red",
+                "description": "Scammers are using voice samples from social media reels/videos to clone relatives' voices. They call crying or in distress claiming they are in jail or had an accident and require urgent wire transfers.",
+                "advisory": "Set up a secret safety passcode with your close family members. Always call the relative back on their known official contact number to verify."
+            },
+            {
+                "id": 3,
+                "title": "Phishing: Fake Electricity Bill Disconnection Alerts",
+                "type": "Utility Fraud Scam",
+                "date": "Highly Trending",
+                "risk": "High Risk",
+                "color": "yellow",
+                "description": "WhatsApp messages or robocalls warning that electricity will be disconnected within 2 hours due to unpaid dues, prompting you to call a fake helpline number.",
+                "advisory": "Utility providers do not contact users via personal WhatsApp numbers or request direct UPI payments to unofficial phone numbers."
+            }
+        ]
     return jsonify(alerts)
 
 if __name__ == "__main__":
