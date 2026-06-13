@@ -454,6 +454,7 @@ document.getElementById("dnaForm").onsubmit = async (e) => {
     `;
     
     document.getElementById("downloadBtn").onclick = async () => {
+        lastResult.threat_category = mode.value === "general" ? "General Cyber Hygiene Check" : threatType.options[threatType.selectedIndex].text;
         let r = await fetch("/download-report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

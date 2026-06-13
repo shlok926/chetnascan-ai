@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, send_file
 from logic import analyze_responses, analyze_text_phishing
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.colors import HexColor
 from io import BytesIO
 from datetime import datetime
 
@@ -33,60 +34,168 @@ def download_report():
     pdf = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
 
-    # ===== TITLE =====
-    pdf.setFont("Helvetica-Bold", 18)
-    pdf.drawString(50, height - 50, "Cyber DNA – Security Risk Report")
-    pdf.line(50, height - 55, width - 50, height - 55)
+    # Calculation of Vigilance Rating
+    total_score = data.get("total_score", 7)
+    vigilance_pct = 100 - int(((total_score - 7) / 28) * 100)
+    vigilance_pct = max(0, min(100, vigilance_pct))
 
-    # ===== SUMMARY =====
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawString(50, height - 90, "Overall Risk Level:")
-    pdf.setFont("Helvetica", 12)
-    pdf.drawString(230, height - 90, data["risk_level"])
+    # Color definitions
+    risk_color = data.get("risk_color", "Green").lower()
+    if risk_color == "red":
+        color_hex = "#ef4444"
+        text_color_hex = "#ef4444"
+    elif risk_color == "yellow":
+        color_hex = "#f59e0b"
+        text_color_hex = "#d97706"
+    else:
+        color_hex = "#10b981"
+        text_color_hex = "#059669"
 
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.drawString(50, height - 115, "Risk Score:")
-    pdf.setFont("Helvetica", 12)
-    pdf.drawString(230, height - 115, f"{data['total_score']} / 35")
+    # ===== 1. HEADER BANNER =====
+    pdf.setFillColor(HexColor("#0f172a")) # Slate 900
+    pdf.rect(0, height - 90, width, 90, fill=1, stroke=0)
 
-    # ===== WEAK AREAS =====
-    y = height - 160
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(50, y, "Identified Weak Areas")
-    pdf.line(50, y - 3, 250, y - 3)
+    # Title and Subtitle
+    pdf.setFillColor(HexColor("#ffffff"))
+    pdf.setFont("Helvetica-Bold", 20)
+    pdf.drawString(40, height - 42, "CYBER DNA")
+    
+    pdf.setFillColor(HexColor("#38bdf8")) # Light blue
+    pdf.setFont("Helvetica-Bold", 8)
+    pdf.drawString(40, height - 62, "PERSONAL CYBER HYGIENE & VULNERABILITY AUDIT")
+
+    # Header Metadata (Right Aligned)
+    pdf.setFillColor(HexColor("#ffffff"))
+    pdf.setFont("Helvetica-Bold", 8)
+    pdf.drawRightString(width - 40, height - 38, f"DATE: {datetime.now().strftime('%d %b %Y').upper()}")
+    pdf.setFillColor(HexColor("#94a3b8"))
+    pdf.setFont("Helvetica", 8)
+    pdf.drawRightString(width - 40, height - 52, f"AUDIT ID: CDNA-{datetime.now().strftime('%m%d%H%M')}")
+    pdf.drawRightString(width - 40, height - 66, "STATUS: OFFICIAL AUDIT")
+
+    # ===== 2. AUDIT STATUS CARD =====
+    card_y = height - 200
+    card_h = 85
+    card_w = width - 80
+    
+    pdf.setFillColor(HexColor("#f8fafc"))
+    pdf.setStrokeColor(HexColor("#e2e8f0"))
+    pdf.setLineWidth(1)
+    pdf.rect(40, card_y, card_w, card_h, fill=1, stroke=1)
+
+    # Left Column: Vigilance Index
+    pdf.setFillColor(HexColor("#475569"))
+    pdf.setFont("Helvetica-Bold", 8)
+    pdf.drawString(60, card_y + 60, "VIGILANCE SAFETY INDEX")
+    
+    pdf.setFillColor(HexColor(text_color_hex))
+    pdf.setFont("Helvetica-Bold", 22)
+    pdf.drawString(60, card_y + 35, f"{vigilance_pct}%")
+
+    # Draw progress bar background
+    bar_x, bar_y, bar_w, bar_h = 60, card_y + 18, 130, 8
+    pdf.setFillColor(HexColor("#e2e8f0"))
+    pdf.rect(bar_x, bar_y, bar_w, bar_h, fill=1, stroke=0)
+    
+    # Draw progress bar fill
+    fill_w = bar_w * (vigilance_pct / 100)
+    if fill_w > 0:
+        pdf.setFillColor(HexColor(color_hex))
+        pdf.rect(bar_x, bar_y, fill_w, bar_h, fill=1, stroke=0)
+
+    # Vertical Divider Line
+    pdf.setStrokeColor(HexColor("#cbd5e1"))
+    pdf.line(220, card_y + 12, 220, card_y + card_h - 12)
+
+    # Right Column: Details
+    pdf.setFillColor(HexColor("#475569"))
+    pdf.setFont("Helvetica-Bold", 8)
+    pdf.drawString(240, card_y + 60, "RISK PROFILE LEVEL:")
+    pdf.setFillColor(HexColor(text_color_hex))
+    pdf.setFont("Helvetica-Bold", 10)
+    pdf.drawString(370, card_y + 60, data["risk_level"].upper())
+
+    pdf.setFillColor(HexColor("#475569"))
+    pdf.setFont("Helvetica-Bold", 8)
+    pdf.drawString(240, card_y + 40, "METRIC EVALUATION SCORE:")
+    pdf.setFillColor(HexColor("#1e293b"))
+    pdf.setFont("Helvetica", 10)
+    pdf.drawString(370, card_y + 40, f"{data['total_score']} / 35")
+
+    pdf.setFillColor(HexColor("#475569"))
+    pdf.setFont("Helvetica-Bold", 8)
+    pdf.drawString(240, card_y + 20, "THREAT CATEGORY ASSESSED:")
+    pdf.setFillColor(HexColor("#1e293b"))
+    pdf.setFont("Helvetica", 9)
+    # Get threat category if present, or general
+    threat_cat = data.get("threat_category", "General Cyber Risk Check")
+    pdf.drawString(370, card_y + 20, str(threat_cat).upper())
+
+    # ===== 3. WEAK AREAS SECTION =====
+    y = card_y - 35
+    pdf.setFillColor(HexColor("#0f172a"))
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(40, y, "1. IDENTIFIED BEHAVIORAL VULNERABILITIES")
+    
+    # Accent line
+    pdf.setStrokeColor(HexColor("#cbd5e1"))
+    pdf.setLineWidth(1)
+    pdf.line(40, y - 5, width - 40, y - 5)
 
     y -= 25
-    pdf.setFont("Helvetica-Bold", 11)
-
-    if data["weak_areas"]:
+    if data.get("weak_areas"):
         for area in data["weak_areas"]:
-            pdf.drawString(60, y, f"• {area}")
+            # Draw warning bullet
+            pdf.setFillColor(HexColor("#f43f5e")) # Rose 500
+            pdf.circle(55, y + 4, 3, fill=1, stroke=0)
+            
+            # Print item text
+            pdf.setFillColor(HexColor("#334155"))
+            pdf.setFont("Helvetica-Bold", 9.5)
+            pdf.drawString(70, y, area)
             y -= 18
     else:
-        pdf.setFont("Helvetica", 11)
-        pdf.drawString(60, y, "• No major weak areas detected")
+        pdf.setFillColor(HexColor("#10b981")) # Emerald 500
+        pdf.circle(55, y + 4, 3, fill=1, stroke=0)
+        
+        pdf.setFillColor(HexColor("#475569"))
+        pdf.setFont("Helvetica", 9.5)
+        pdf.drawString(70, y, "No critical behavioral risks detected in this assessment cycle.")
+        y -= 18
 
-    # ===== RECOMMENDATIONS =====
-    y -= 30
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(50, y, "Security Recommendations")
-    pdf.line(50, y - 3, 300, y - 3)
+    # ===== 4. RECOMMENDATIONS SECTION =====
+    y -= 15
+    pdf.setFillColor(HexColor("#0f172a"))
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(40, y, "2. RECOMMENDATIONS & INCIDENT PREVENTION PROTOCOLS")
+    
+    pdf.setStrokeColor(HexColor("#cbd5e1"))
+    pdf.line(40, y - 5, width - 40, y - 5)
 
     y -= 25
     for tip in data["recommendations"]:
-        pdf.setFont("Helvetica-Bold", 11)
-        pdf.drawString(60, y, "✔")
-        pdf.setFont("Helvetica", 11)
-        pdf.drawString(80, y, tip)
+        # Draw checkmark bullet
+        pdf.setFillColor(HexColor("#10b981")) # Emerald 500
+        pdf.circle(55, y + 4, 3, fill=1, stroke=0)
+        
+        # Print recommendation text
+        pdf.setFillColor(HexColor("#334155"))
+        pdf.setFont("Helvetica", 9.5)
+        pdf.drawString(70, y, tip)
         y -= 18
 
-    # ===== FOOTER =====
-    pdf.setFont("Helvetica-Oblique", 9)
-    pdf.drawString(50, 40, "Generated for cyber awareness purposes only.")
-    pdf.drawRightString(
-        width - 50, 40,
-        f"Generated on: {datetime.now().strftime('%d %b %Y, %H:%M')}"
-    )
+    # ===== 5. FOOTER & DISCLAIMER =====
+    pdf.setStrokeColor(HexColor("#e2e8f0"))
+    pdf.setLineWidth(1)
+    pdf.line(40, 55, width - 40, 55)
+
+    pdf.setFillColor(HexColor("#64748b"))
+    pdf.setFont("Helvetica-Oblique", 7.5)
+    disclaimer = "Disclaimer: This assessment is for cyber security awareness purposes only and does not constitute technical penetration testing."
+    pdf.drawString(40, 42, disclaimer)
+    
+    pdf.setFont("Helvetica", 7.5)
+    pdf.drawRightString(width - 40, 42, "Generated by Cyber DNA Core Engine")
 
     pdf.showPage()
     pdf.save()
@@ -101,3 +210,4 @@ def download_report():
 
 if __name__ == "__main__":
     app.run()
+
