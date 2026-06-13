@@ -7,7 +7,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -15,11 +15,12 @@
 <div class="cyber-overlay"></div>
 
 <div class="container">
-    <!-- GLOWING TOP BANNER / HEADER -->
+    <!-- TOP BANNER / HEADER -->
     <header class="header">
         <div class="logo-area">
-            <div class="logo-shield">🛡️</div>
-            <div class="logo-glow"></div>
+            <svg class="logo-shield-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
         </div>
         <div class="title-meta">
             <h1 class="main-title">Cyber DNA</h1>
@@ -34,16 +35,16 @@
     <!-- TAB NAVIGATION BAR -->
     <nav class="cyber-tabs">
         <button class="tab-btn active" onclick="switchTab('testTab')" id="btnTestTab">
-            <span class="tab-icon">🧬</span> Behavioral Test
+            Behavioral Test
         </button>
         <button class="tab-btn" onclick="switchTab('phishTab')" id="btnPhishTab">
-            <span class="tab-icon">🔍</span> Message Scanner
+            Message Scanner
         </button>
         <button class="tab-btn" onclick="switchTab('simTab')" id="btnSimTab">
-            <span class="tab-icon">🎮</span> Attack Simulator
+            Attack Simulator
         </button>
         <button class="tab-btn" onclick="switchTab('dashTab')" id="btnDashTab">
-            <span class="tab-icon">📊</span> Security Center
+            Security Center
         </button>
     </nav>
 
@@ -53,7 +54,7 @@
         <!-- ================= TAB 1: BEHAVIORAL TEST ================= -->
         <section id="testTab" class="tab-content active">
             <div class="section-intro">
-                <h2>🧬 Human Vulnerability Assessment</h2>
+                <h2>Human Vulnerability Assessment</h2>
                 <p>Profile your cybersecurity behavior. Social engineering bypasses tech security—assess if your habits act as a shield or a vulnerability.</p>
             </div>
 
@@ -102,7 +103,7 @@
         <!-- ================= TAB 2: TEXT PHISHING ANALYZER ================= -->
         <section id="phishTab" class="tab-content">
             <div class="section-intro">
-                <h2>🔍 AI/NLP Phishing Message Scanner</h2>
+                <h2>AI/NLP Phishing Message Scanner</h2>
                 <p>Paste emails, SMS messages, or social media texts to scan for social engineering indicator vectors (urgency, credential phishing, fake rewards).</p>
             </div>
 
@@ -127,7 +128,7 @@
         <!-- ================= TAB 3: SCAM SIMULATOR ================= -->
         <section id="simTab" class="tab-content">
             <div class="section-intro">
-                <h2>🎮 Interactive Social Engineering Simulator</h2>
+                <h2>Interactive Social Engineering Simulator</h2>
                 <p>Train your reflexes in active threat scenarios. Interact with simulated social engineers in real time and test your decision security.</p>
             </div>
 
@@ -137,15 +138,15 @@
                     <h3>Available Simulations</h3>
                     <div class="scenario-buttons">
                         <button class="scenario-btn" onclick="startSimulation('bankOtp')" id="btnSimBank">
-                            <span class="scenario-title">🏦 Bank OTP Urgent Call</span>
+                            <span class="scenario-title">Bank OTP Urgent Call</span>
                             <span class="scenario-desc">A fraud prevention agent calls claiming your money is in danger.</span>
                         </button>
                         <button class="scenario-btn" onclick="startSimulation('lotteryScam')" id="btnSimLottery">
-                            <span class="scenario-title">🎉 International Prize Winner</span>
+                            <span class="scenario-title">International Prize Winner</span>
                             <span class="scenario-desc">A WhatsApp message tells you that you've won $100,000.</span>
                         </button>
                         <button class="scenario-btn" onclick="startSimulation('relativeScam')" id="btnSimRelative">
-                            <span class="scenario-title">🚨 Relative Accident Crisis</span>
+                            <span class="scenario-title">Relative Accident Crisis</span>
                             <span class="scenario-desc">Your cousin Rahul requests urgent cash from an unknown number.</span>
                         </button>
                     </div>
@@ -170,7 +171,7 @@
         <!-- ================= TAB 4: SECURITY CENTER ================= -->
         <section id="dashTab" class="tab-content">
             <div class="section-intro">
-                <h2>📊 Security Operations Center (SOC)</h2>
+                <h2>Security Operations Center (SOC)</h2>
                 <p>Monitor your threat profiles, historical safety logs, security certification levels, and unlocked tactical badges.</p>
             </div>
 
@@ -433,18 +434,18 @@ document.getElementById("dnaForm").onsubmit = async (e) => {
         </div>
         
         <div class="vulnerabilities-section">
-            <h4>⚠️ Identified Weak Areas</h4>
+            <h4>Identified Weak Areas</h4>
             <ul class="vuln-list">
                 ${lastResult.weak_areas.length 
-                    ? lastResult.weak_areas.map(w => `<li><span class='bullet-icon'>✖</span> ${w}</li>`).join("")
-                    : "<li><span class='bullet-icon'>✔</span> No major behavioral risks flagged in this cycle.</li>"}
+                    ? lastResult.weak_areas.map(w => `<li><span class='bullet-icon'>✗</span> ${w}</li>`).join("")
+                    : "<li><span class='bullet-icon'>✓</span> No major behavioral risks flagged in this cycle.</li>"}
             </ul>
         </div>
         
         <div class="recommendations-section">
-            <h4>💡 Recommended Defenses</h4>
+            <h4>Recommended Defenses</h4>
             <ul class="rec-list">
-                ${lastResult.recommendations.map(r => `<li><span class='bullet-icon'>✔</span> ${r}</li>`).join("")}
+                ${lastResult.recommendations.map(r => `<li><span class='bullet-icon'>✓</span> ${r}</li>`).join("")}
             </ul>
         </div>
         
@@ -543,7 +544,7 @@ async function runPhishingScan() {
             <div class="recommendations-section">
                 <h5>Actions Required</h5>
                 <ul class="rec-list">
-                    ${result.tips.map(tip => `<li><span class='bullet-icon'>✔</span> ${tip}</li>`).join("")}
+                    ${result.tips.map(tip => `<li><span class='bullet-icon'>✓</span> ${tip}</li>`).join("")}
                 </ul>
             </div>
         `;
@@ -570,7 +571,7 @@ async function runPhishingScan() {
 /* ===== INTERACTIVE SCAM SIMULATOR ===== */
 const scenarios = {
     bankOtp: {
-        title: "🏦 Bank Fraud Department Call",
+        title: "Bank Fraud Department Call",
         stages: [
             {
                 text: "<b>Unknown Caller:</b> 'Alert! We detected an unauthorized attempt to transfer $500 from your account to a crypto exchange. To prevent this, we have blocked your card. I've sent a 6-digit confirmation code to your phone. Please read it to me to reverse this transfer immediately.'",
@@ -578,19 +579,19 @@ const scenarios = {
                     {
                         text: "Provide code: 'Sure, it is 482931.'",
                         scoreEffect: 35,
-                        feedback: "🔴 <b>Compromised!</b> You shared your OTP. The scammer completed the transaction on their device. Banks never ask for OTPs over calls.",
+                        feedback: "<b>Compromised!</b> You shared your OTP. The scammer completed the transaction on their device. Banks never ask for OTPs over calls.",
                         nextStage: null
                     },
                     {
                         text: "Doubt identity: 'How do I verify you are actually calling from my bank?'",
                         scoreEffect: 15,
-                        feedback: "⚠️ <b>Vulnerable:</b> You engaged with the caller. Social engineers are highly trained to manipulate you with fake credentials.",
+                        feedback: "<b>Vulnerable:</b> You engaged with the caller. Social engineers are highly trained to manipulate you with fake credentials.",
                         nextStage: "bankDoubt"
                     },
                     {
                         text: "Hang up: 'I will not share verification codes. I am calling my bank support directly.'",
                         scoreEffect: 0,
-                        feedback: "🟢 <b>Vigilant!</b> Hanging up immediately and dialing the official customer care number on your physical debit card is the safest action.",
+                        feedback: "<b>Vigilant!</b> Hanging up immediately and dialing the official customer care number on your physical debit card is the safest action.",
                         nextStage: null
                     }
                 ]
@@ -602,13 +603,13 @@ const scenarios = {
                     {
                         text: "Panick and give the code.",
                         scoreEffect: 35,
-                        feedback: "🔴 <b>Compromised!</b> The SMS sender ID was spoofed. Real banks never threaten immediate account suspension to force disclosure of OTP codes.",
+                        feedback: "<b>Compromised!</b> The SMS sender ID was spoofed. Real banks never threaten immediate account suspension to force disclosure of OTP codes.",
                         nextStage: null
                     },
                     {
                         text: "Hang up instantly and check banking app.",
                         scoreEffect: 0,
-                        feedback: "🟢 <b>Vigilant!</b> You successfully bypass the psychological pressure of urgency. You are secure.",
+                        feedback: "<b>Vigilant!</b> You successfully bypass the psychological pressure of urgency. You are secure.",
                         nextStage: null
                     }
                 ]
@@ -616,7 +617,7 @@ const scenarios = {
         ]
     },
     lotteryScam: {
-        title: "🎉 International Megamillions Winning Alert",
+        title: "International Megamillions Winning Alert",
         stages: [
             {
                 text: "<b>Sender [Unknown WhatsApp]:</b> 'CONGRATULATIONS! Your mobile number has won a cash prize of $100,000. To release your reward, click the link: <u>http://lottery-claim.cc/win</u> or register within 2 hours.'",
@@ -624,19 +625,19 @@ const scenarios = {
                     {
                         text: "Click link: Open the portal.",
                         scoreEffect: 35,
-                        feedback: "🔴 <b>Compromised!</b> The link contains a credential harvesting page designed to steal passwords. Never click unknown external links.",
+                        feedback: "<b>Compromised!</b> The link contains a credential harvesting page designed to steal passwords. Never click unknown external links.",
                         nextStage: null
                     },
                     {
                         text: "Reply: 'How can I get my money without the link?'",
                         scoreEffect: 15,
-                        feedback: "⚠️ <b>Vulnerable:</b> Replying informs scammers that this phone line is active and checked, leading to targeted spam campaigns.",
+                        feedback: "<b>Vulnerable:</b> Replying informs scammers that this phone line is active and checked, leading to targeted spam campaigns.",
                         nextStage: "lotteryChat"
                     },
                     {
                         text: "Block & Report number.",
                         scoreEffect: 0,
-                        feedback: "🟢 <b>Vigilant!</b> Standard safety protocol. Unsolicited lottery notifications for tickets you never purchased are scams.",
+                        feedback: "<b>Vigilant!</b> Standard safety protocol. Unsolicited lottery notifications for tickets you never purchased are scams.",
                         nextStage: null
                     }
                 ]
@@ -648,13 +649,13 @@ const scenarios = {
                     {
                         text: "Purchase gift cards and send codes.",
                         scoreEffect: 40,
-                        feedback: "🔴 <b>Compromised!</b> Classic advance-fee fraud. Legitimate sweepstakes never request payouts in gift cards or crypto.",
+                        feedback: "<b>Compromised!</b> Classic advance-fee fraud. Legitimate sweepstakes never request payouts in gift cards or crypto.",
                         nextStage: null
                     },
                     {
                         text: "Refuse, block, and flag spam.",
                         scoreEffect: 0,
-                        feedback: "🟢 <b>Vigilant!</b> You aborted the interaction. Security maintained.",
+                        feedback: "<b>Vigilant!</b> You aborted the interaction. Security maintained.",
                         nextStage: null
                     }
                 ]
@@ -662,7 +663,7 @@ const scenarios = {
         ]
     },
     relativeScam: {
-        title: "🚨 Urgent Cousin Help Request",
+        title: "Urgent Cousin Help Request",
         stages: [
             {
                 text: "<b>SMS [Unknown number]:</b> 'Hey, it's cousin Rahul. I was on a trip and had an accident. My phone screen is broken, so I'm using a friend's phone. I need $150 to pay the towing truck. Send it to UPI: rahul.pay@upi'",
@@ -670,19 +671,19 @@ const scenarios = {
                     {
                         text: "Transfer money immediately to help.",
                         scoreEffect: 35,
-                        feedback: "🔴 <b>Compromised!</b> You sent money to an impersonator without verifying. Always verify request identities first.",
+                        feedback: "<b>Compromised!</b> You sent money to an impersonator without verifying. Always verify request identities first.",
                         nextStage: null
                     },
                     {
                         text: "Bait scammer: 'How is your dog Rocky?' (knowing Rocky doesn't exist).",
                         scoreEffect: 10,
-                        feedback: "🟡 <b>Clever check:</b> Testing relative details shows vigilance. However, a secondary voice call is the definitive verification tool.",
+                        feedback: "<b>Clever check:</b> Testing relative details shows vigilance. However, a secondary voice call is the definitive verification tool.",
                         nextStage: "relativeVerify"
                     },
                     {
                         text: "Call Rahul directly on his known contact number.",
                         scoreEffect: 0,
-                        feedback: "🟢 <b>Vigilant!</b> The only secure way to verify a relative emergency is to speak to them via trusted communication channels.",
+                        feedback: "<b>Vigilant!</b> The only secure way to verify a relative emergency is to speak to them via trusted communication channels.",
                         nextStage: null
                     }
                 ]
@@ -694,13 +695,13 @@ const scenarios = {
                     {
                         text: "Realize he is lying (there is no Rocky) and block him.",
                         scoreEffect: 0,
-                        feedback: "🟢 <b>Vigilant!</b> You caught them in a contradiction. Scenario terminated securely.",
+                        feedback: "<b>Vigilant!</b> You caught them in a contradiction. Scenario terminated securely.",
                         nextStage: null
                     },
                     {
                         text: "Send money anyway, maybe he was confused.",
                         scoreEffect: 35,
-                        feedback: "🔴 <b>Compromised!</b> You ignored a verified warning sign and funded a social engineering scam.",
+                        feedback: "<b>Compromised!</b> You ignored a verified warning sign and funded a social engineering scam.",
                         nextStage: null
                     }
                 ]
@@ -924,18 +925,18 @@ function renderDashboard() {
     let phishRuns = history.filter(h => h.type.includes("Phishing")).length;
     let simRuns = history.filter(h => h.type.includes("Simulator")).length;
     
-    if (testRuns > 0) badges.push({ title: "Geneticist", icon: "🧬", desc: "Completed a behavior profile test" });
+    if (testRuns > 0) badges.push({ title: "Geneticist", desc: "Completed a behavior profile test" });
     if (simRuns > 0) {
         let perfectSim = history.find(h => h.type.includes("Simulator") && h.raw_score === 0);
         if (perfectSim) {
-            badges.push({ title: "Social Engineer Deflector", icon: "⚔️", desc: "Achieved a perfect score in a scam scenario" });
+            badges.push({ title: "Social Engineer Deflector", desc: "Achieved a perfect score in a scam scenario" });
         } else {
-            badges.push({ title: "Combat Trainee", icon: "🎯", desc: "Completed an interactive scam simulation run" });
+            badges.push({ title: "Combat Trainee", desc: "Completed an interactive scam simulation run" });
         }
     }
-    if (phishRuns > 0) badges.push({ title: "Phishing Analyst", icon: "🔍", desc: "Analyzed external text for indicators" });
+    if (phishRuns > 0) badges.push({ title: "Phishing Analyst", desc: "Analyzed external text for indicators" });
     if (protectionIndex >= 90 && totalAssessed >= 3) {
-        badges.push({ title: "Cyber DNA Sentinel", icon: "👑", desc: "Maintained a Fortified Shield over multiple checks" });
+        badges.push({ title: "Cyber DNA Sentinel", desc: "Maintained a Fortified Shield over multiple checks" });
     }
     
     renderBadges(badges);
@@ -953,7 +954,7 @@ function renderBadges(badges) {
         const el = document.createElement("div");
         el.className = "badge-card";
         el.innerHTML = `
-            <div class="badge-icon">${b.icon}</div>
+            <div class="badge-status-dot"></div>
             <div class="badge-info">
                 <h4>${b.title}</h4>
                 <p>${b.desc}</p>
