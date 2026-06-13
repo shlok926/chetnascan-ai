@@ -230,6 +230,393 @@ def download_report():
         mimetype="application/pdf"
     )
 
+@app.route("/download-comprehensive-report", methods=["POST"])
+def download_comprehensive_report():
+    data = request.json
+    history = data.get("history", [])
+    osint_result = data.get("osint_result")
+    protection_index = int(data.get("protection_index", 100))
+    shield_status = data.get("shield_status", "UNASSESSED").upper()
+    shield_desc = data.get("shield_desc", "")
+    badges = data.get("badges", [])
+
+    buffer = BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    # Color configuration based on status
+    if shield_status in ["FORTIFIED", "SAFE"]:
+        color_hex = "#10b981" # Emerald
+        bg_card_hex = "#ecfdf5"
+    elif shield_status in ["VIGILANT", "WARNING"]:
+        color_hex = "#f59e0b" # Amber
+        bg_card_hex = "#fffbeb"
+    else:
+        color_hex = "#ef4444" # Red
+        bg_card_hex = "#fef2f2"
+
+    # ==========================================
+    # PAGE 1: EXECUTIVE SECURITY BRIEFING
+    # ==========================================
+    
+    # 1. Slate Top Header Banner
+    pdf.setFillColor(HexColor("#0f172a")) # Dark Slate
+    pdf.rect(0, height - 100, width, 100, fill=1, stroke=0)
+
+    # Title & Subtitle
+    pdf.setFillColor(HexColor("#ffffff"))
+    pdf.setFont("Helvetica-Bold", 22)
+    pdf.drawString(40, height - 45, "CYBER DNA")
+    
+    pdf.setFillColor(HexColor("#38bdf8")) # Sky Blue
+    pdf.setFont("Helvetica-Bold", 9)
+    pdf.drawString(40, height - 68, "EXECUTIVE CYBER RISK AUDIT & INTEGRATED SECURITY REPORT")
+
+    # Header Metadata
+    pdf.setFillColor(HexColor("#ffffff"))
+    pdf.setFont("Helvetica-Bold", 8.5)
+    pdf.drawRightString(width - 40, height - 40, f"DATE: {datetime.now().strftime('%d %b %Y').upper()}")
+    pdf.setFillColor(HexColor("#94a3b8"))
+    pdf.setFont("Helvetica", 8.5)
+    pdf.drawRightString(width - 40, height - 55, f"REPORT ID: CDNA-EXEC-{datetime.now().strftime('%m%d%H%M')}")
+    pdf.drawRightString(width - 40, height - 70, "CLASSIFICATION: CONFIDENTIAL PERSONAL AUDIT")
+
+    # Decorative Cyan Line under header
+    pdf.setFillColor(HexColor("#0ea5e9"))
+    pdf.rect(0, height - 103, width, 3, fill=1, stroke=0)
+
+    # 2. Main Executive Summary Card
+    card_y = height - 230
+    card_h = 100
+    card_w = width - 80
+    
+    pdf.setFillColor(HexColor(bg_card_hex))
+    pdf.setStrokeColor(HexColor("#cbd5e1"))
+    pdf.setLineWidth(1)
+    pdf.rect(40, card_y, card_w, card_h, fill=1, stroke=1)
+
+    # Draw left border accent highlight
+    pdf.setFillColor(HexColor(color_hex))
+    pdf.rect(40, card_y, 5, card_h, fill=1, stroke=0)
+
+    # Overall Vigilance Index Label
+    pdf.setFillColor(HexColor("#334155"))
+    pdf.setFont("Helvetica-Bold", 9)
+    pdf.drawString(65, card_y + 75, "INTEGRATED VIGILANCE SHIELD INDEX")
+
+    # Large Percentage & Status
+    pdf.setFillColor(HexColor(color_hex))
+    pdf.setFont("Helvetica-Bold", 26)
+    pdf.drawString(65, card_y + 42, f"{protection_index}%")
+    
+    pdf.setFillColor(HexColor("#1e293b"))
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(65, card_y + 22, f"POSTURE STATUS: {shield_status}")
+
+    # Vertical Divider Line
+    pdf.setStrokeColor(HexColor("#cbd5e1"))
+    pdf.line(260, card_y + 12, 260, card_y + card_h - 12)
+
+    # Summary Details (Right side of card)
+    pdf.setFillColor(HexColor("#475569"))
+    pdf.setFont("Helvetica-Bold", 8.5)
+    pdf.drawString(280, card_y + 75, "AUDIT METRICS & FINDINGS OVERVIEW:")
+
+    pdf.setFont("Helvetica", 9)
+    pdf.setFillColor(HexColor("#334155"))
+    num_tests = len(history)
+    pdf.drawString(280, card_y + 55, f"• Assessments Completed: {num_tests} run(s)")
+    
+    badge_count = len(badges)
+    pdf.drawString(280, card_y + 38, f"• Badges Unlocked: {badge_count} tactical badges")
+    
+    has_osint = "YES (Critical Leak Assessment)" if osint_result else "NO (Baseline Assessment)"
+    pdf.drawString(280, card_y + 21, f"• Dark Web Scan Performed: {has_osint}")
+
+    # 3. Badges Section
+    badge_y = card_y - 35
+    pdf.setFillColor(HexColor("#0f172a"))
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(40, badge_y, "1. UNLOCKED TACTICAL SECURITY BADGES")
+    pdf.setStrokeColor(HexColor("#e2e8f0"))
+    pdf.line(40, badge_y - 6, width - 40, badge_y - 6)
+
+    # Draw badges
+    y_pos = badge_y - 30
+    if badges:
+        col_w = (width - 80) / 2
+        for idx, badge in enumerate(badges):
+            col = idx % 2
+            row = idx // 2
+            bx = 40 + col * col_w
+            by = y_pos - row * 38
+            
+            # Badge card container
+            pdf.setFillColor(HexColor("#f8fafc"))
+            pdf.setStrokeColor(HexColor("#e2e8f0"))
+            pdf.rect(bx, by, col_w - 10, 32, fill=1, stroke=1)
+            
+            # Icon Dot
+            pdf.setFillColor(HexColor("#0284c7"))
+            pdf.circle(bx + 15, by + 16, 4, fill=1, stroke=0)
+            
+            # Title
+            pdf.setFillColor(HexColor("#1e293b"))
+            pdf.setFont("Helvetica-Bold", 8.5)
+            pdf.drawString(bx + 28, by + 18, badge.get("title", ""))
+            
+            # Desc
+            pdf.setFillColor(HexColor("#64748b"))
+            pdf.setFont("Helvetica", 7.5)
+            pdf.drawString(bx + 28, by + 7, badge.get("desc", ""))
+        
+        # Calculate new y position based on badge rows
+        y_pos -= (((len(badges) + 1) // 2) * 38)
+    else:
+        pdf.setFillColor(HexColor("#475569"))
+        pdf.setFont("Helvetica-Oblique", 9)
+        pdf.drawString(55, y_pos, "No tactical badges unlocked. Complete behavioral profiles to earn recognition.")
+        y_pos -= 20
+
+    # 4. History Logs Section (Table)
+    log_y = y_pos - 15
+    pdf.setFillColor(HexColor("#0f172a"))
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(40, log_y, "2. SECURITY ASSESSMENT HISTORY LOGS")
+    pdf.setStrokeColor(HexColor("#e2e8f0"))
+    pdf.line(40, log_y - 6, width - 40, log_y - 6)
+
+    # Draw Table Header
+    th_y = log_y - 25
+    pdf.setFillColor(HexColor("#f1f5f9"))
+    pdf.rect(40, th_y - 4, width - 80, 18, fill=1, stroke=0)
+    
+    pdf.setFillColor(HexColor("#475569"))
+    pdf.setFont("Helvetica-Bold", 8.5)
+    pdf.drawString(50, th_y, "TIMESTAMP")
+    pdf.drawString(180, th_y, "ASSESSMENT TYPE / THREAT CHECK")
+    pdf.drawString(380, th_y, "SCORE")
+    pdf.drawString(460, th_y, "RISK LEVEL")
+
+    # Draw Table Rows (up to 6 records to fit page 1)
+    tr_y = th_y - 20
+    if history:
+        for idx, entry in enumerate(history[:6]):
+            # Alternate row background
+            if idx % 2 == 1:
+                pdf.setFillColor(HexColor("#f8fafc"))
+                pdf.rect(40, tr_y - 4, width - 80, 16, fill=1, stroke=0)
+                
+            pdf.setFillColor(HexColor("#334155"))
+            pdf.setFont("Helvetica", 8.5)
+            pdf.drawString(50, tr_y, entry.get("timestamp", ""))
+            pdf.drawString(180, tr_y, entry.get("type", ""))
+            pdf.drawString(380, tr_y, entry.get("score", ""))
+            
+            # Risk color matching
+            lvl_color = entry.get("color", "green").lower()
+            if lvl_color == "red":
+                pdf.setFillColor(HexColor("#ef4444"))
+            elif lvl_color == "yellow":
+                pdf.setFillColor(HexColor("#d97706"))
+            else:
+                pdf.setFillColor(HexColor("#10b981"))
+                
+            pdf.setFont("Helvetica-Bold", 8.5)
+            pdf.drawString(460, tr_y, entry.get("level", "SAFE"))
+            tr_y -= 18
+    else:
+        pdf.setFillColor(HexColor("#64748b"))
+        pdf.setFont("Helvetica-Oblique", 9)
+        pdf.drawString(50, tr_y - 5, "No history logs found in assessment databases.")
+        tr_y -= 20
+
+    # Page Footer
+    pdf.setStrokeColor(HexColor("#cbd5e1"))
+    pdf.line(40, 50, width - 40, 50)
+    pdf.setFillColor(HexColor("#64748b"))
+    pdf.setFont("Helvetica", 7.5)
+    pdf.drawString(40, 38, "Cyber DNA Integrated Core Report - Confidential")
+    pdf.drawRightString(width - 40, 38, "Page 1 of 2")
+
+    # ==========================================
+    # PAGE 2: OSINT EXPOSURE & TACTICAL MITIGATION
+    # ==========================================
+    pdf.showPage()
+
+    # Smaller top header banner for Page 2
+    pdf.setFillColor(HexColor("#0f172a"))
+    pdf.rect(0, height - 60, width, 60, fill=1, stroke=0)
+    pdf.setFillColor(HexColor("#ffffff"))
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(40, height - 35, "CYBER DNA - INTEGRATED AUDIT REPORT")
+    pdf.setFillColor(HexColor("#38bdf8"))
+    pdf.setFont("Helvetica-Bold", 7.5)
+    pdf.drawRightString(width - 40, height - 35, "SECTION II: OSINT LEAK DATA & SPECIFIC REMEDIATIONS")
+
+    # 1. OSINT Exposure Data
+    osint_y = height - 100
+    pdf.setFillColor(HexColor("#0f172a"))
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(40, osint_y, "3. SIMULATED OSINT DARK WEB DATA EXPOSURE")
+    pdf.setStrokeColor(HexColor("#e2e8f0"))
+    pdf.line(40, osint_y - 6, width - 40, osint_y - 6)
+
+    oy = osint_y - 25
+    if osint_result:
+        email_addr = osint_result.get("email", "")
+        exp_index = int(osint_result.get("exposure_index", 0))
+        breaches = osint_result.get("breaches", [])
+        
+        pdf.setFillColor(HexColor("#1e293b"))
+        pdf.setFont("Helvetica-Bold", 10)
+        pdf.drawString(40, oy, f"Target Scanned Identity: ")
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(160, oy, email_addr)
+        
+        pdf.setFont("Helvetica-Bold", 10)
+        pdf.drawString(380, oy, "Exposure Rating:")
+        
+        if exp_index >= 70:
+            pdf.setFillColor(HexColor("#ef4444")) # Critical Red
+            rating_txt = f"{exp_index}/100 (CRITICAL RISK)"
+        elif exp_index >= 40:
+            pdf.setFillColor(HexColor("#d97706")) # Medium Amber
+            rating_txt = f"{exp_index}/100 (MEDIUM RISK)"
+        else:
+            pdf.setFillColor(HexColor("#10b981")) # Low Emerald
+            rating_txt = f"{exp_index}/100 (LOW RISK)"
+            
+        pdf.setFont("Helvetica-Bold", 10)
+        pdf.drawString(470, oy, rating_txt)
+        
+        oy -= 25
+        pdf.setFillColor(HexColor("#475569"))
+        pdf.setFont("Helvetica-Bold", 9)
+        pdf.drawString(40, oy, f"Identified Data Breaches & Leaks ({len(breaches)} found):")
+        oy -= 15
+
+        for b in breaches[:4]: # Limit to 4 to fit clean page height
+            # Draw leak summary card
+            pdf.setFillColor(HexColor("#f8fafc"))
+            pdf.setStrokeColor(HexColor("#cbd5e1"))
+            pdf.rect(40, oy - 50, width - 80, 54, fill=1, stroke=1)
+            
+            # Left accent bar based on leak risk
+            pdf.setFillColor(HexColor("#f43f5e"))
+            pdf.rect(40, oy - 50, 4, 54, fill=1, stroke=0)
+            
+            # Title
+            pdf.setFillColor(HexColor("#0f172a"))
+            pdf.setFont("Helvetica-Bold", 9)
+            pdf.drawString(55, oy - 4, b.get("name", ""))
+            
+            # Date
+            pdf.setFillColor(HexColor("#64748b"))
+            pdf.setFont("Helvetica", 7.5)
+            pdf.drawRightString(width - 55, oy - 4, f"LEAK DATE: {b.get('date', '').upper()}")
+            
+            # Compromised parameters
+            comp_data = ", ".join(b.get("compromised_data", []))
+            pdf.setFillColor(HexColor("#b91c1c"))
+            pdf.setFont("Helvetica-Bold", 8)
+            pdf.drawString(55, oy - 16, f"COMPROMISED DATA: {comp_data}")
+            
+            # Description
+            desc_text = b.get("details", "")
+            # Wrap description into 2 lines if long
+            pdf.setFillColor(HexColor("#475569"))
+            pdf.setFont("Helvetica", 8)
+            if len(desc_text) > 110:
+                pdf.drawString(55, oy - 28, desc_text[:110])
+                pdf.drawString(55, oy - 38, desc_text[110:220] + "...")
+            else:
+                pdf.drawString(55, oy - 28, desc_text)
+                
+            oy -= 64
+    else:
+        # Placeholder if OSINT not run
+        pdf.setFillColor(HexColor("#f8fafc"))
+        pdf.setStrokeColor(HexColor("#e2e8f0"))
+        pdf.rect(40, oy - 45, width - 80, 50, fill=1, stroke=1)
+        
+        pdf.setFillColor(HexColor("#0284c7"))
+        pdf.circle(60, oy - 20, 4, fill=1, stroke=0)
+        
+        pdf.setFillColor(HexColor("#334155"))
+        pdf.setFont("Helvetica-Bold", 9.5)
+        pdf.drawString(75, oy - 17, "No External Dark Web Credential Scans Run")
+        pdf.setFillColor(HexColor("#64748b"))
+        pdf.setFont("Helvetica", 8.5)
+        pdf.drawString(75, oy - 32, "Verify your exposure index by performing an OSINT Leak Scan in the Security Operations Center (SOC).")
+        oy -= 65
+
+    # 2. Recommendations Section
+    rec_y = oy - 10
+    pdf.setFillColor(HexColor("#0f172a"))
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(40, rec_y, "4. TACTICAL MITIGATION GUIDANCE & RECOMMENDATIONS")
+    pdf.setStrokeColor(HexColor("#e2e8f0"))
+    pdf.line(40, rec_y - 6, width - 40, rec_y - 6)
+
+    # Compile custom recommendations list
+    recs = []
+    # If OSINT leaks exist
+    if osint_result and osint_result.get("breaches"):
+        recs.append("A data breach contains your credentials. Change passwords on all shared accounts immediately.")
+        recs.append("Implement Multi-Factor Authentication (MFA/2FA) on your email provider and corporate platforms.")
+    
+    # If behavioral scores are low
+    has_unsafe = False
+    for item in history:
+        if "vulnerable" in item.get("level", "").lower() or "medium" in item.get("level", "").lower():
+            has_unsafe = True
+            break
+            
+    if has_unsafe or not history:
+        recs.append("Verify email attachments or sender domains prior to logging into credential forms.")
+        recs.append("Never share One-Time Passwords (OTPs) or authorization prompt tokens over phone or text.")
+        recs.append("Establish out-of-band communication lines to verify identity when receiving money transfer requests.")
+    else:
+        recs.append("Maintain routine simulation practices on emerging threat vectors (like AI voice clones).")
+        recs.append("Review connected applications permissions in your email and social accounts annually.")
+        
+    recs.append("Conduct a security profile evaluation at least once a quarter to update your Cyber DNA Shield.")
+
+    # Render recommendations
+    ry = rec_y - 25
+    for r in recs[:5]:
+        pdf.setFillColor(HexColor("#10b981")) # Green bullet
+        pdf.circle(50, ry + 3, 2.5, fill=1, stroke=0)
+        
+        pdf.setFillColor(HexColor("#334155"))
+        pdf.setFont("Helvetica", 9)
+        pdf.drawString(65, ry, r)
+        ry -= 18
+
+    # Page Footer
+    pdf.setStrokeColor(HexColor("#cbd5e1"))
+    pdf.line(40, 50, width - 40, 50)
+    
+    pdf.setFillColor(HexColor("#64748b"))
+    pdf.setFont("Helvetica-Oblique", 7.5)
+    disclaimer = "Disclaimer: This comprehensive audit is based on local assessments and simulated exposures. Use it for organizational awareness."
+    pdf.drawString(40, 38, disclaimer)
+    
+    pdf.setFont("Helvetica", 7.5)
+    pdf.drawRightString(width - 40, 38, "Page 2 of 2")
+
+    pdf.showPage()
+    pdf.save()
+
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="Cyber_DNA_Comprehensive_Audit.pdf",
+        mimetype="application/pdf"
+    )
+
 @app.route("/scam-alerts", methods=["GET"])
 def scam_alerts():
     alerts = [

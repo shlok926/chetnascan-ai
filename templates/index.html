@@ -227,9 +227,14 @@
 
         <!-- ================= TAB 4: SECURITY CENTER ================= -->
         <section id="dashTab" class="tab-content">
-            <div class="section-intro">
-                <h2>Security Operations Center (SOC)</h2>
-                <p>Monitor your threat profiles, historical safety logs, security certification levels, and unlocked tactical badges.</p>
+            <div class="section-intro" style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 280px;">
+                    <h2>Security Operations Center (SOC)</h2>
+                    <p>Monitor your threat profiles, historical safety logs, security certification levels, and unlocked tactical badges.</p>
+                </div>
+                <button type="button" class="cyber-btn" onclick="downloadComprehensiveReport()" id="btnDownloadComp" style="margin-top: 0; width: auto; padding: 12px 20px;">
+                    <span class="btn-text">Export Comprehensive Audit (PDF)</span>
+                </button>
             </div>
 
             <div class="soc-dashboard-layout">
@@ -1224,6 +1229,114 @@ function renderDashboard() {
     }
     
     renderBadges(badges);
+}
+
+async function downloadComprehensiveReport() {
+    let history = getHistory();
+    let osintResult = null;
+    let osintResultRaw = localStorage.getItem("cyber_dna_osint_result");
+    if (osintResultRaw) {
+        try {
+            osintResult = JSON.parse(osintResultRaw);
+        } catch(e) {
+            console.error(e);
+        }
+    }
+    
+    let osintExposure = parseInt(localStorage.getItem("cyber_dna_osint_exposure") || "0");
+    let protectionIndex = 100;
+    let shieldStatus = "UNASSESSED";
+    let shieldDesc = "Take the Cyber DNA Test or play the Scam Simulator to build your security shield.";
+    
+    if (history.length === 0) {
+        if (osintExposure > 0) {
+            protectionIndex = Math.max(0, 100 - Math.round(osintExposure * 0.4));
+            if (protectionIndex >= 85) {
+                shieldStatus = "FORTIFIED";
+                shieldDesc = `Active leak check complete. Exposure is low (${osintExposure}/100). Keep monitoring threat vectors.`;
+            } else if (protectionIndex >= 50) {
+                shieldStatus = "VIGILANT";
+                shieldDesc = `Moderate risk data leak exposure detected (${osintExposure}/100). Take safety tests to reinforce your posture.`;
+            } else {
+                shieldStatus = "VULNERABLE";
+                shieldDesc = `High leak risk detected on your accounts (${osintExposure}/100)! Immediate password rotation and MFA setup recommended.`;
+            }
+        }
+    } else {
+        let totalScoreSum = 0;
+        let countScoreRuns = 0;
+        history.forEach(item => {
+            let normalized = 0;
+            if (item.type.includes("Phishing") || item.type.includes("Simulator")) {
+                normalized = 100 - ((item.raw_score / item.max_score) * 100);
+            } else {
+                normalized = Math.max(0, 100 - (((item.raw_score - 7) / 28) * 100));
+            }
+            totalScoreSum += normalized;
+            countScoreRuns++;
+        });
+        let baseProtection = Math.round(totalScoreSum / countScoreRuns);
+        protectionIndex = Math.max(0, baseProtection - Math.round(osintExposure * 0.4));
+        
+        if (protectionIndex >= 85) {
+            shieldStatus = "FORTIFIED";
+            shieldDesc = "Fantastic work! Your safety habits, detection metrics, and simulated responses prove you are a hard target for hackers.";
+        } else if (protectionIndex >= 50) {
+            shieldStatus = "VIGILANT";
+            shieldDesc = "Moderate protection. You understand some warnings but still have habits that leave your accounts exposed to target scams.";
+        } else {
+            shieldStatus = "VULNERABLE";
+            shieldDesc = "Critical weaknesses. Your behavior or simulator runs indicate high vulnerability to social engineering scams.";
+        }
+        if (osintExposure > 0) {
+            shieldDesc += ` (Exposure Index deduction of -${Math.round(osintExposure * 0.4)}% applied from dark web data leak scans)`;
+        }
+    }
+
+    let badges = [];
+    let testRuns = history.filter(h => h.type.includes("Assessment")).length;
+    let phishRuns = history.filter(h => h.type.includes("Phishing")).length;
+    let simRuns = history.filter(h => h.type.includes("Simulator")).length;
+    
+    if (testRuns > 0) badges.push({ title: "Geneticist", desc: "Completed a behavior profile test" });
+    if (simRuns > 0) {
+        let perfectSim = history.find(h => h.type.includes("Simulator") && h.raw_score === 0);
+        if (perfectSim) {
+            badges.push({ title: "Social Engineer Deflector", desc: "Achieved a perfect score in a scam scenario" });
+        } else {
+            badges.push({ title: "Combat Trainee", desc: "Completed an interactive scam simulation run" });
+        }
+    }
+    if (phishRuns > 0) badges.push({ title: "Phishing Analyst", desc: "Analyzed external text for indicators" });
+    if (protectionIndex >= 90 && history.length >= 3) {
+        badges.push({ title: "Cyber DNA Sentinel", desc: "Maintained a Fortified Shield over multiple checks" });
+    }
+
+    try {
+        let r = await fetch("/download-comprehensive-report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                history: history,
+                osint_result: osintResult,
+                protection_index: protectionIndex,
+                shield_status: shieldStatus,
+                shield_desc: shieldDesc,
+                badges: badges
+            })
+        });
+        
+        if (!r.ok) throw new Error("Server error generating comprehensive report");
+        
+        let blob = await r.blob();
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `Cyber_DNA_Comprehensive_Audit_${new Date().toISOString().slice(0,10)}.pdf`;
+        a.click();
+    } catch(err) {
+        console.error(err);
+        alert("An error occurred while exporting the comprehensive PDF report: " + err.message);
+    }
 }
 
 async function runOsintScan() {
