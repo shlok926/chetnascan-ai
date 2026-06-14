@@ -46,7 +46,9 @@
 - [📖 Usage Guide](#-usage-guide)
 - [🛡️ Security Disclaimer](#%EF%B8%8F-security-disclaimer)
 - [🌱 Future Scope](#-future-scope)
-- [👨‍💻 Author](#-author)
+- [🤝 Contributing & Feedback](#-contributing--feedback)
+- [⭐ Show Your Support](#-show-your-support)
+- [👤 Author & Contact](#-author--contact)
 
 ---
 
@@ -159,7 +161,51 @@ This software is provided for educational and cybersecurity awareness purposes o
 
 ---
 
-## 👨‍💻 Author
+## 🤝 Contributing & Feedback
 
-* **Shlok Thorat**
-* Project repository: [ChetnaScan AI GitHub](https://github.com/shlok926/cyber-dna)
+Contributions, suggestions, and feedback are highly welcome!
+
+* **Got suggestions or feature requests?** Feel free to open a new [Issue](https://github.com/shlok926/cyber-dna/issues) or share your ideas.
+* **Want to contribute?** Feel free to fork this repository, make your changes, and submit a Pull Request.
+
+---
+
+## ⭐ Show Your Support
+
+<p align="center"><b>Love this tool? Help us grow:</b></p>
+
+```text
+✨ Star the repository  (GitHub Star Button)
+🐛 Report bugs          (GitHub Issues)
+💡 Suggest features     (GitHub Discussions)
+📢 Share with others    (LinkedIn/Twitter)
+🤝 Contribute code      (Pull Requests)
+```
+
+---
+
+## 👤 Author & Contact
+
+<p align="center">
+  <b>👨‍💻 Shlok Thorat</b>
+</p>
+
+<p align="center"><i>Let's connect on LinkedIn, collaborate, and build amazing things together!</i></p>
+
+<p align="center">
+  <a href="mailto:shlokthorat29075@gmail.com">
+    <img src="https://img.shields.io/badge/Email-shlokthorat29075%40gmail.com-d14836?style=flat-square&logo=gmail&logoColor=white" alt="Email">
+  </a>
+  <a href="https://github.com/shlok926">
+    <img src="https://img.shields.io/badge/GitHub-%40shlok926-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub">
+  </a>
+  <a href="https://www.linkedin.com/in/shlok-thorat-39916a405">
+    <img src="https://img.shields.io/badge/LinkedIn-shlok--thorat--39916a405-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn">
+  </a>
+</p>
+
+---
+
+<p align="center">
+  Made with ❤️ for cyber security awareness • <a href="#-chetnascan-ai">Back to Top</a>
+</p>
