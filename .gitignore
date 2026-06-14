@@ -7,3 +7,4 @@ Codes.txt
 .vscode/
 venv/
 env/
+!static/logo.png
